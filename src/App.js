@@ -8,15 +8,16 @@ import MarketPage from "./pages/MarketPage";
 import Navbar from "./components/Navbar";
 import "./App.css";
 
+export const UserContext = React.createContext()
+
 class App extends React.Component {
   state = {
     user: null
   };
 
   componentDidMount() {
-    // console.dir("Examine theme object: ", AmplifyTheme);
     this.getUserData();
-    Hub.listen("auth", this, "onHubCapsule");
+    Hub.listen('auth', this.listener);
   }
 
   getUserData = async () => {
@@ -24,8 +25,8 @@ class App extends React.Component {
     user ? this.setState({ user }) : this.setState({ user: null });
   };
 
-  onHubCapsule = capsule => {
-    switch (capsule.payload.event) {
+  listener = (data) => {
+    switch (data.payload.event) {
       case "signIn":
         console.log("signed in");
         this.getUserData();
@@ -56,6 +57,7 @@ class App extends React.Component {
     return !user ? (
       <Authenticator theme={theme} />
     ) : (
+      <UserContext.Provider value={{ user }}>
       <Router>
         <>
           {/* Navbar */}
@@ -74,6 +76,7 @@ class App extends React.Component {
           </div>
         </>
       </Router>
+      </UserContext.Provider>
     );
   }
 }
